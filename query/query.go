@@ -24,8 +24,10 @@ func (db *DB) Create(c *Customers) error {
 		fmt.Println("error :", err)
 		return err
 	}
+
 	_, errExec := stmt.Exec(c.Name, c.Phone, c.Email, c.Age)
 	if err != nil {
+		fmt.Println("err:", err)
 		return errExec
 	}
 	return nil

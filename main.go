@@ -2,10 +2,12 @@ package main
 
 import (
 	"bootcamp-api-hmsi/connectdb"
-	"bootcamp-api-hmsi/query"
-	"fmt"
+	"bootcamp-api-hmsi/moduls/customers/customerHandler"
+	"bootcamp-api-hmsi/moduls/customers/customerRepository"
+	"bootcamp-api-hmsi/moduls/customers/customerUseCase"
 	"os"
 
+	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	"github.com/rs/zerolog/log"
 )
@@ -42,28 +44,14 @@ func main() {
 	}
 	log.Info().Msg("Connected to database")
 
-	// DB struct initialize
-	DB := query.DB{Conn: db}
+	// Inisisalisasi router
+	router := gin.Default()
 
-	// Create customer
-	err = DB.Create(&query.Customers{
-		Name:  "Sholikul",
-		Phone: "083807201787",
-		Email: "sholikulardian@mail.com",
-		Age:   19,
-	})
+	// inisisalisasi modules
+	customerRepo := customerRepository.NewCustomerRepository(db)
+	customerUC := customerUseCase.NewCustomerUseCase(customerRepo)
+	customerHandler.NewCustomerHandler(router, customerUC)
 
-	if err != nil {
-		log.Error().Msg(errConn.Error())
-		os.Exit(1)
-	}
-	fmt.Println("Insert Data Berhasil")
-
-	// Read customer
-	result, err := DB.Read()
-	if err != nil {
-		log.Error().Msg(errConn.Error())
-		os.Exit(1)
-	}
-	fmt.Println(result)
+	log.Info().Msg("Server running on port" + PORT)
+	router.Run(":" + PORT)
 }
